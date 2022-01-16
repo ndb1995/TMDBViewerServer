@@ -28,7 +28,6 @@ namespace TMDBViewerServer
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddScoped<MovieService>();
         }
 
