@@ -1,0 +1,124 @@
+﻿@page "/"
+
+@using TMDBViewerServer.Data
+@using TMDbLib.Client
+@using TMDbLib.Objects.Movies
+@using TMDbLib.Objects.General;
+@using TMDbLib.Objects.Search;
+
+@inject MovieService service
+<div class="container">
+    <div class=col>
+        <div class="row bg-light">
+            <div class="col">
+                <label for="id">Updated with TMDB ID</label>
+                <input type="text" id="ratng" class="form-control" @bind="@tmdbID" />
+                <button class="btn btn-info" @onclick="updateMovieID"> Update Movie</button>
+            </div>
+            <div class="col">
+                <label for="id">Updated with IMDB ID</label>
+                <input type="text" id="ratng" class="form-control" @bind="@imdbID" />
+                <button class="btn btn-info" @onclick="updateMovieName"> Update Movie</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class=col>
+    <div class="card mb-3">
+        <div class="row no-gutters">
+            <div class="col-md-4">
+                <img src=@getFullPosterPath() class="img-fluid img-thumbnail" alt=@movie.PosterPath>
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">@movie.Title</h5>
+                    <p class="card-text">@movie.Overview</p>
+                    <p class="card-text"><small class="text-muted">Release Date: @movie.ReleaseDate</small></p>
+                    <p class="card-text"><small class="text-muted">Budget: @movie.Budget</small></p>
+
+                    <div class="card-deck">
+
+                        @if (movie.Credits != null)
+                        {
+                            @*counter = 0;*@
+                            @foreach (Cast cast in movie.Credits.Cast)
+                            {
+                                @*counter++;*@
+                                <div class="card mb-2">
+                                    <img src=@getThumbnail(cast) class="card-img-top img-fluid" alt=@cast.ProfilePath>
+                                    <div class="card-body">
+                                        <h4 class="card-title">@cast.Name</h4>
+                                        <p class="card-text">@cast.Character</p>
+                                    </div>
+                                </div>
+                                @*if (counter > 11) break;*@
+                            }
+                        }
+                        else
+                        {
+                            <h4 class="card-title">Cast is null</h4>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media (min-width:768px) {
+        .card-deck > .card {
+            width: 10%;
+            flex-wrap: wrap;
+            flex: initial;
+        }
+    }
+
+</style>
+
+
+@code {
+    Movie movie = new Movie();
+    Video video = new Video();
+
+    int tmdbID;
+    string imdbID;
+    int counter = 0;
+
+    // when component loads, show initial seed movie
+    protected override async Task OnInitializedAsync()
+    {
+        await initialMovie();
+    }
+
+    private async Task initialMovie()
+    {
+        // show something initially
+        movie = await service.getMovieTMDB(278);
+    }
+
+    // 8491 = weekend at bernies
+    // update the screen based off of tmdb id
+    private async Task updateMovieID()
+    {
+        movie = await service.getMovieTMDB(tmdbID);
+    }
+
+    //update screen based off of imdb ID
+    private async Task updateMovieName()
+    {
+        movie = await service.getMovieIMDB(imdbID);
+    }
+
+    private string getFullPosterPath()
+    {
+        return ("https://www.themoviedb.org/t/p/original" + @movie.PosterPath);
+    }
+
+    private string getThumbnail(Cast cast)
+    {
+        return ("https://www.themoviedb.org/t/p/w138_and_h175_face/" + cast.ProfilePath);
+    }
+
+}
