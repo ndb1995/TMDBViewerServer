@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using TMDbLib.Client;
+using TMDbLib.Objects.General;
 using TMDbLib.Objects.Movies;
+using TMDbLib.Objects.Search;
 
 namespace TMDBViewerServer.Data
 {
@@ -28,5 +30,13 @@ namespace TMDBViewerServer.Data
 
             return movie;
         }
+
+        public async Task<SearchContainer<SearchMovie>> getMovieByName(string movieName)
+        {
+            SearchContainer<SearchMovie> results = client.SearchMovieAsync(movieName).Result;
+
+            return results;
+        }
+        
     }
 }
