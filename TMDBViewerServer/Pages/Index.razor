@@ -20,11 +20,6 @@
                 <input type="text" id="ratng" class="form-control" @bind="@imdbID" />
                 <button class="btn btn-info" @onclick="updateIMDBName"> Update Movie</button>
             </div>
-            <div class="col">
-                <label for="id">Enter movie name</label>
-                <input type="text" id="ratng" class="form-control" @bind="@movieName" />
-                <button class="btn btn-info" @onclick="updateMovieName"> Update Movie</button>
-            </div>
         </div>
     </div>
 </div>
@@ -93,7 +88,7 @@
     string imdbID;
     string movieName;
     int counter = 0;
-
+    List<SearchMovie> searchResultList = new List<SearchMovie>();
     // when component loads, show initial seed movie
     protected override async Task OnInitializedAsync()
     {
@@ -126,9 +121,10 @@
         Console.WriteLine($"Got {results.Results.Count:N0} of {results.TotalResults:N0} results");
         foreach (SearchMovie result in results.Results)
         {
-            if (result.Popularity > 200000.0)
+            if (result.VoteCount > 1000.0)
             {
-                Console.WriteLine($"{result.Title} - {result.Popularity}");
+                searchResultList.Add(result);
+                Console.WriteLine($"{result.Title} - {result.Popularity} - {result.VoteCount}");
             }
             
         }

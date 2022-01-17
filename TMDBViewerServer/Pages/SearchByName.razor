@@ -1,0 +1,87 @@
+﻿@page "/searchbyname"
+
+@using TMDBViewerServer.Data
+@using TMDbLib.Client
+@using TMDbLib.Objects.Movies
+@using TMDbLib.Objects.General;
+@using TMDbLib.Objects.Search;
+
+@inject MovieService service
+<div class="container">
+    <div class=col>
+        <div class="row bg-light">
+            <div class="col">
+                <label for="id">Enter movie name</label>
+                <input type="text" id="ratng" class="form-control" @bind="@movieName" />
+                <button class="btn btn-info" @onclick="updateMovieName"> Update Movie</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class=col>
+    @foreach (SearchMovie result in searchResultList)
+    {
+        <div class="card mb-3">
+            <div class="row no-gutters">
+                <div class="col-md-4">
+                    <img src=@getFullPosterPath(result) class="img-fluid img-thumbnail" alt=@result.PosterPath>
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">@result.Title</h5>
+                        <p class="card-text">@result.Overview</p>
+                        <p class="card-text"><small class="text-muted">Release Date: @result.ReleaseDate</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    @@media (min-width:768px) {
+        .card-deck > .card {
+            width: 10%;
+            flex-wrap: wrap;
+            flex: initial;
+        }
+    }
+
+</style>
+
+
+@code {
+    SearchContainer<SearchMovie> results = new SearchContainer<SearchMovie>();
+
+    string movieName;
+
+    List<SearchMovie> searchResultList = new List<SearchMovie>();
+    // when component loads, show initial seed movie
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    //update screen based off of imdb ID
+    private async Task updateMovieName()
+    {
+        searchResultList.Clear();
+        results = await service.getMovieByName(movieName);
+        foreach (SearchMovie result in results.Results)
+        {
+            // if a movie is popular enough it's probably that movie. This algo is not an exact science
+            if (result.VoteCount > 1000.0 | result.VoteAverage > 5)
+            {
+                searchResultList.Add(result);
+                Console.WriteLine($"{result.Title} - {result.Popularity} - {result.VoteCount}");
+            }
+
+        }
+
+    }
+
+    private string getFullPosterPath(SearchMovie result)
+    {
+        return ("https://www.themoviedb.org/t/p/original" + @result.PosterPath);
+    }
+}
