@@ -11,9 +11,12 @@
     <div class=col>
         <div class="row bg-light">
             <div class="col">
-                <label for="id">Enter movie name</label>
-                <input type="text" id="ratng" class="form-control" @bind="@movieName" />
-                <button class="btn btn-info" @onclick="updateMovieName"> Update Movie</button>
+                <div class="input-group">
+                    <input type="text" id="movieName" class="form-control" placeholder="Enter movie name" @bind="@movieName" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-info" @onclick="updateMovieName"> Update Movie</button>
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -52,15 +55,8 @@
 
 @code {
     SearchContainer<SearchMovie> results = new SearchContainer<SearchMovie>();
-
-    string movieName;
-
     List<SearchMovie> searchResultList = new List<SearchMovie>();
-    // when component loads, show initial seed movie
-    protected override async Task OnInitializedAsync()
-    {
-
-    }
+    string movieName;
 
     //update screen based off of imdb ID
     private async Task updateMovieName()
@@ -69,15 +65,17 @@
         results = await service.getMovieByName(movieName);
         foreach (SearchMovie result in results.Results)
         {
-            // if a movie is popular enough it's probably that movie. This algo is not an exact science
-            if (result.VoteCount > 1000.0 | result.VoteAverage > 5)
-            {
-                searchResultList.Add(result);
-                Console.WriteLine($"{result.Title} - {result.Popularity} - {result.VoteCount}");
-            }
-
+            searchResultList.Add(result);
         }
+        searchResultList.Sort(new PopularityCompare());
+    }
 
+    private class PopularityCompare : IComparer<SearchMovie>
+    {
+        public int Compare(SearchMovie x, SearchMovie y)
+        {
+            return y.Popularity.CompareTo(x.Popularity);
+        }
     }
 
     private string getFullPosterPath(SearchMovie result)

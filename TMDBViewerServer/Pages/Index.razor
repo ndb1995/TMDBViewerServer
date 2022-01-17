@@ -3,22 +3,26 @@
 @using TMDBViewerServer.Data
 @using TMDbLib.Client
 @using TMDbLib.Objects.Movies
-@using TMDbLib.Objects.General;
-@using TMDbLib.Objects.Search;
 
 @inject MovieService service
 <div class="container">
     <div class=col>
         <div class="row bg-light">
             <div class="col">
-                <label for="id">Enter TMDB ID</label>
-                <input type="text" id="ratng" class="form-control" @bind="@tmdbID" />
-                <button class="btn btn-info" @onclick="updateTMDBID"> Update Movie</button>
+                <div class="input-group">
+                    <input type="text" id="tmdbID" class="form-control" placeholder="Enter TMDB ID" @bind="@tmdbID" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-info" @onclick="updateTMDBID"> Update Movie</button>
+                    </span>
+                </div>
             </div>
             <div class="col">
-                <label for="id">Enter IMDB ID</label>
-                <input type="text" id="ratng" class="form-control" @bind="@imdbID" />
-                <button class="btn btn-info" @onclick="updateIMDBName"> Update Movie</button>
+                <div class="input-group">
+                    <input type="text" id="imdbID" class="form-control" placeholder="Enter IMDB ID" @bind="@imdbID" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-info" @onclick="updateIMDBName"> Update Movie</button>
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -40,10 +44,8 @@
 
                         @if (movie.Credits != null)
                         {
-                            @*counter = 0;*@
                             @foreach (Cast cast in movie.Credits.Cast)
                             {
-                                @*counter++;*@
                                 <div class="card mb-2">
                                     <img src=@getThumbnail(cast) class="card-img-top img-fluid" alt=@cast.ProfilePath>
                                     <div class="card-body">
@@ -51,7 +53,6 @@
                                         <p class="card-text">@cast.Character</p>
                                     </div>
                                 </div>
-                                @*if (counter > 11) break;*@
                             }
                         }
                         else
@@ -80,15 +81,12 @@
 
 @code {
     Movie movie = new Movie();
-    Video video = new Video();
-    SearchContainer<SearchMovie> results = new SearchContainer<SearchMovie>();
+
 
 
     int tmdbID;
     string imdbID;
-    string movieName;
-    int counter = 0;
-    List<SearchMovie> searchResultList = new List<SearchMovie>();
+
     // when component loads, show initial seed movie
     protected override async Task OnInitializedAsync()
     {
@@ -112,23 +110,6 @@
     private async Task updateIMDBName()
     {
         movie = await service.getMovieIMDB(imdbID);
-    }
-
-    //update screen based off of imdb ID
-    private async Task updateMovieName()
-    {
-        results = await service.getMovieByName(movieName);
-        Console.WriteLine($"Got {results.Results.Count:N0} of {results.TotalResults:N0} results");
-        foreach (SearchMovie result in results.Results)
-        {
-            if (result.VoteCount > 1000.0)
-            {
-                searchResultList.Add(result);
-                Console.WriteLine($"{result.Title} - {result.Popularity} - {result.VoteCount}");
-            }
-            
-        }
-        
     }
 
     private string getFullPosterPath()
